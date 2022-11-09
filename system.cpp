@@ -107,7 +107,9 @@ int System::signUp() {
     //增加用户成功
     Account account(id, name, passwd);
     accounts.push_back(account);
-    accountIndex[id] = &accounts.back();
+    for (auto &acc: accounts) {
+        accountIndex[acc.id] = &(account);
+    }
     Record::saveRecord(accounts);
     cout << "用户增加成功!" << endl;
     return 1;
@@ -174,32 +176,62 @@ int System::changePassword() {
 
 //账户注销
 int System::deleteAccount() {
+    if (isAdmin) {
+        string id;
+        char ch;
+        cout << "请输入要注销的账户id: ";
+        cin >> id;
+        id = MD5(id).toStr();
+        if (!accountIndex.count(id)) {
+            cout << "账户不存在" << endl;
+            return -1;
+        }
+        cout << "请确认是否要注销该账户<Y/N>: ";
+        cin >> ch;
+        if (ch != 'y' && ch != 'Y') {
+            cout << "操作取消" << endl;
+            return -2;
+        }
 
-    string id;
-    char ch;
-    cout << "请输入要注销的账户id: ";
-    cin >> id;
-    id = MD5(id).toStr();
-    if (!accountIndex.count(id)) {
-        cout << "账户不存在" << endl;
-        return -1;
+        /*for (auto &account: accounts) {
+            accountIndex[account.id] = &(account);
+        }*/
+        swap(*accountIndex[id], *(accounts.end() - 1));
+        accounts.pop_back();
+        accountIndex.erase(id);
+        Record::saveRecord(accounts);
+        cout << "账户注销成功" << endl;
+        return 1;
     }
-    cout << "请确认是否要注销该账户<Y/N>: ";
-    cin >> ch;
-    if (ch != 'y' && ch != 'Y') {
-        cout << "操作取消" << endl;
-        return -2;
+    else {
+        string passwd;
+        char ch;
+        cout << "请输入密码: ";
+        cin >> passwd;
+        passwd = MD5(passwd).toStr();
+        if (passwd != currAccount->passwd){
+            cout << "密码错误";
+            return -1;
+        }
+        cout << "您的余额为 " <<setiosflags(ios::fixed) << setprecision(2)<< currAccount->balance << " 元,是否确认注销<Y/N>";
+        cin >> ch;
+        if (ch != 'y' && ch != 'Y'){
+            cout << "操作取消";
+            return -2;
+        }
+        //成功注销
+        /*for (auto &account: accounts) {
+            accountIndex[account.id] = &(account);
+        }*/
+        accountIndex.erase(currAccount->id);
+        swap(*currAccount, *(accounts.end() - 1));
+        accounts.pop_back();
+        currAccount = nullptr;
+        currAccountId.clear();
+        Record::saveRecord(accounts);
+        cout << "账户注销成功" << endl;
+        return 1;
     }
-
-    for (auto &account: accounts) {
-        accountIndex[account.id] = &(account);
-    }
-    swap(*accountIndex[id], *(accounts.end()-1));
-    accounts.pop_back();
-    accountIndex.erase(id);
-    Record::saveRecord(accounts);
-    cout << "账户注销成功" << endl;
-    return 1;
 }
 
 int System::showBalance() {
@@ -214,7 +246,8 @@ int System::showBalance() {
         }
         cout << "该账号当前的余额为 " << setiosflags(ios::fixed) << setprecision(2) << accountIndex[id]->balance
              << " 元";
-    } else {
+    }
+    else {
         cout << "您当前的余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元";
     }
     return 1;
@@ -433,6 +466,7 @@ void System::mainMenu() {
                     cout << "              【3】 账户查询\n";
                     cout << "              【4】 转账\n";
                     cout << "              【5】 修改密码\n";
+                    cout << "              【6】 销户\n";
                     cout << "              【0】 退出\n\n";
                     cout << "        └------------------------┘\n";
                     cin >> choice3;
@@ -483,6 +517,11 @@ void System::mainMenu() {
                             cout << "        ┌------------------------┐\n";
                             cout << "                #修改密码#\n\n";
                             changePassword();
+                            break;
+                        case 6:
+                            cout << "        ┌------------------------┐\n";
+                            cout << "                  #销户#\n\n";
+                            deleteAccount();
                             break;
                         case 0:
                             signOut();
