@@ -1,3 +1,0 @@
-C:/Users/13987/Desktop/ATM_sys/cmake-build-debug/CMakeFiles/ATM_sys.dir
-C:/Users/13987/Desktop/ATM_sys/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/13987/Desktop/ATM_sys/cmake-build-debug/CMakeFiles/rebuild_cache.dir
