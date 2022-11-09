@@ -1,0 +1,3 @@
+C:/Users/13987/Desktop/ATM_sys/cmake-build-release-mingw/CMakeFiles/ATM_sys.dir
+C:/Users/13987/Desktop/ATM_sys/cmake-build-release-mingw/CMakeFiles/edit_cache.dir
+C:/Users/13987/Desktop/ATM_sys/cmake-build-release-mingw/CMakeFiles/rebuild_cache.dir

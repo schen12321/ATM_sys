@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" native2AsciiForPropertiesFiles="true" defaultCharsetForPropertiesFiles="GBK">
+    <file url="file://$PROJECT_DIR$/account.cpp" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/account.h" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/record.cpp" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/record.h" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/system.cpp" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/system.h" charset="GBK" />
+    <file url="PROJECT" charset="GBK" />
+  </component>
+</project>
