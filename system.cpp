@@ -100,8 +100,18 @@ int System::signUp() {
     }
     cout << "请输入你的姓名:";
     cin >> name;
-    cout << "请输入密码:";
+    cout << "请输入密码(6位数字):";
     cin >> passwd;
+    if (passwd.length() != 6) {
+        cout << "密码长度错误!" << endl;
+        return -1;
+    }
+    for (int i = 0; i < 6; i++) {
+        if (passwd[i] <= 48 || passwd[i] >= 57) {
+            cout << "密码格式错误!" << endl;
+            return -2;
+        }
+    }
     passwd = MD5(passwd).toStr();
 
     //增加用户成功
@@ -129,8 +139,18 @@ int System::changePassword() {
             cout << "卡号不存在！" << endl;
             return 0;
         }
-        cout << "请输入新密码:";
+        cout << "请输入新密码(6位数字):";
         cin >> newPasswd;
+        if (newPasswd.length() != 6) {
+            cout << "密码长度错误!" << endl;
+            return -1;
+        }
+        for (int i = 0; i < 6; i++) {
+            if (newPasswd[i] <= 48 || newPasswd[i] >= 57) {
+                cout << "密码格式错误!" << endl;
+                return -2;
+            }
+        }
         newPasswd = MD5(newPasswd).toStr();
         if (newPasswd == accountIndex[id]->passwd) {
             cout << "新旧密码相同!" << endl;
@@ -149,8 +169,18 @@ int System::changePassword() {
     else {
         string newPasswd, passwdConfirm;
         char ch;
-        cout << "请输入新密码: ";
+        cout << "请输入新密码(6位数字): ";
         cin >> newPasswd;
+        if (newPasswd.length() != 6) {
+            cout << "密码长度错误!" << endl;
+            return -1;
+        }
+        for (int i = 0; i < 6; i++) {
+            if (newPasswd[i] <= 48 || newPasswd[i] >= 57) {
+                cout << "密码格式错误!" << endl;
+                return -2;
+            }
+        }
         cout << "请再次确认新密码: ";
         cin >> passwdConfirm;
         if (passwdConfirm != newPasswd) {
