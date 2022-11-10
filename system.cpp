@@ -29,7 +29,7 @@ int System::signIn() {
     cout << "请输入密码:";
     cin >> passwd;
     passwd = MD5(passwd).toStr();
-    cout << accountIndex[id]->wrongPasswdLeft;
+    //cout << accountIndex[id]->wrongPasswdLeft;
     if (accountIndex[id]->passwd != passwd) {
         cout << "密码错误";
         accountIndex[id]->wrongPasswdLeft -= 1;
@@ -108,7 +108,8 @@ int System::signUp() {
     Account account(id, name, passwd);
     accounts.push_back(account);
     for (auto &acc: accounts) {
-        accountIndex[acc.id] = &(account);
+        accountIndex[acc.id] = &(acc);
+        cout << &(acc)<<endl;
     }
     Record::saveRecord(accounts);
     cout << "用户增加成功!" << endl;
@@ -416,7 +417,7 @@ void System::mainMenu() {
             case 1:
                 adminSignIn();
                 if (!isAdmin) {
-                    continue;
+                    break;
                 }
                 do {
                     cout << "        ┌------------------------┐\n";
