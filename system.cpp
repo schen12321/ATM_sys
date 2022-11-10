@@ -103,12 +103,12 @@ int System::signUp() {
     cout << "请输入密码(6位数字):";
     cin >> passwd;
     if (passwd.length() != 6) {
-        cout << "密码长度错误!" << endl;
+        cout << "密码必须为6位数字!" << endl;
         return -1;
     }
     for (int i = 0; i < 6; i++) {
-        if (passwd[i] <= 48 || passwd[i] >= 57) {
-            cout << "密码格式错误!" << endl;
+        if (passwd[i] < 48 || passwd[i] > 57) {
+            cout << "密码必须为6位数字!" << endl;
             return -2;
         }
     }
@@ -117,10 +117,9 @@ int System::signUp() {
     //增加用户成功
     Account account(id, name, passwd);
     accounts.push_back(account);
-    /*for (auto &acc: accounts) {
+    for (auto &acc: accounts) {
         accountIndex[acc.id] = &(acc);
-        cout << &(acc)<< endl;
-    }*/
+    }
     Record::saveRecord(accounts);
     cout << "用户增加成功!" << endl;
     return 1;
@@ -142,12 +141,12 @@ int System::changePassword() {
         cout << "请输入新密码(6位数字):";
         cin >> newPasswd;
         if (newPasswd.length() != 6) {
-            cout << "密码长度错误!" << endl;
+            cout << "密码必须为6位数字!" << endl;
             return -1;
         }
         for (int i = 0; i < 6; i++) {
-            if (newPasswd[i] <= 48 || newPasswd[i] >= 57) {
-                cout << "密码格式错误!" << endl;
+            if (newPasswd[i] < 48 || newPasswd[i] > 57) {
+                cout << "密码必须为6位数字!" << endl;
                 return -2;
             }
         }
@@ -172,12 +171,12 @@ int System::changePassword() {
         cout << "请输入新密码(6位数字): ";
         cin >> newPasswd;
         if (newPasswd.length() != 6) {
-            cout << "密码长度错误!" << endl;
+            cout << "密码必须为6位数字!" << endl;
             return -1;
         }
         for (int i = 0; i < 6; i++) {
-            if (newPasswd[i] <= 48 || newPasswd[i] >= 57) {
-                cout << "密码格式错误!" << endl;
+            if (newPasswd[i] < 48 || newPasswd[i] > 57) {
+                cout << "密码必须为6位数字!" << endl;
                 return -2;
             }
         }
@@ -223,10 +222,6 @@ int System::deleteAccount() {
             cout << "操作取消" << endl;
             return -2;
         }
-
-        /*for (auto &account: accounts) {
-            accountIndex[account.id] = &(account);
-        }*/
         swap(*accountIndex[id], *(accounts.end() - 1));
         accounts.pop_back();
         accountIndex.erase(id);
@@ -251,9 +246,6 @@ int System::deleteAccount() {
             return -2;
         }
         //成功注销
-        /*for (auto &account: accounts) {
-            accountIndex[account.id] = &(account);
-        }*/
         accountIndex.erase(currAccount->id);
         swap(*currAccount, *(accounts.end() - 1));
         accounts.pop_back();
