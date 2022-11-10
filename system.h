@@ -1,5 +1,5 @@
 #include <vector>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <string>
 #include <algorithm>
 #include <iomanip>
@@ -7,12 +7,15 @@
 #include <sys/timeb.h>
 #include <ctime>
 #include <iostream>
+#include <unistd.h>
+#include <cstdlib>
 #include "record.h"
 #include "MD5.h"
+#include "snack.h"
 
 using std::cout;
 using std::cin;
-using std::tr1::unordered_map;
+using std::unordered_map;
 using std::swap;
 using std::ios;
 using std::setprecision;
