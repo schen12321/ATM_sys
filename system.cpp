@@ -9,7 +9,7 @@ System::System() {
 
 //启动ATM，之后无限循环，直到点击退出按钮使用exit(0)结束程序
 void System::start() {
-        mainMenu();
+    mainMenu();
 }
 
 int System::signIn() {
@@ -107,10 +107,10 @@ int System::signUp() {
     //增加用户成功
     Account account(id, name, passwd);
     accounts.push_back(account);
-    for (auto &acc: accounts) {
+    /*for (auto &acc: accounts) {
         accountIndex[acc.id] = &(acc);
-        cout << &(acc)<<endl;
-    }
+        cout << &(acc)<< endl;
+    }*/
     Record::saveRecord(accounts);
     cout << "用户增加成功!" << endl;
     return 1;
@@ -133,7 +133,7 @@ int System::changePassword() {
         cin >> newPasswd;
         newPasswd = MD5(newPasswd).toStr();
         if (newPasswd == accountIndex[id]->passwd) {
-            cout << "新旧密码相同!" <<endl;
+            cout << "新旧密码相同!" << endl;
             return 0;
         }
         cout << "请确认是否修改<Y/N>: ";
@@ -203,20 +203,20 @@ int System::deleteAccount() {
         Record::saveRecord(accounts);
         cout << "账户注销成功" << endl;
         return 1;
-    }
-    else {
+    } else {
         string passwd;
         char ch;
         cout << "请输入密码: ";
         cin >> passwd;
         passwd = MD5(passwd).toStr();
-        if (passwd != currAccount->passwd){
+        if (passwd != currAccount->passwd) {
             cout << "密码错误";
             return -1;
         }
-        cout << "您的余额为 " <<setiosflags(ios::fixed) << setprecision(2)<< currAccount->balance << " 元,是否确认注销<Y/N>";
+        cout << "您的余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance
+             << " 元,是否确认注销<Y/N>";
         cin >> ch;
-        if (ch != 'y' && ch != 'Y'){
+        if (ch != 'y' && ch != 'Y') {
             cout << "操作取消";
             return -2;
         }
@@ -247,8 +247,7 @@ int System::showBalance() {
         }
         cout << "该账号当前的余额为 " << setiosflags(ios::fixed) << setprecision(2) << accountIndex[id]->balance
              << " 元";
-    }
-    else {
+    } else {
         cout << "您当前的余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元";
     }
     return 1;
