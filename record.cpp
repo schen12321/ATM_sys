@@ -120,19 +120,18 @@ void Record::printVoucher(const Account::Transaction &transaction) {
     cout << "交易类型：";
     if (transaction.transactionType == 1) {
         cout << "存款" << endl;
-        cout << "存款金额：CNY " << transaction.transactionAmount;
+        cout << "存款金额：CNY " << transaction.transactionAmount << endl;
     } else if (transaction.transactionType == 2) {
         cout << "取款" << endl;
-        cout << "取款金额：CNY " << transaction.transactionAmount;
+        cout << "取款金额：CNY " << transaction.transactionAmount << endl;
     } else if (transaction.transactionType == 3) {
         cout << "转账收款" << endl;
         cout << "收款金额：CNY " << transaction.transactionAmount << endl;
-        cout << "对方账号：" << transaction.counterpartyAccount;
+        cout << "对方账号：" << transaction.counterpartyAccount << endl;
     } else if (transaction.transactionType == 4) {
         cout << "转账付款" << endl;
         cout << "付款金额：CNY " << transaction.transactionAmount << endl;
         cout << "对方账号：" << transaction.counterpartyAccount << endl;
-        cout << endl;
     }
 }
 

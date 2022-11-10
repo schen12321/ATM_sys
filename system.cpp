@@ -403,64 +403,84 @@ int System::transfer() {
 }
 
 void System::mainMenu() {
-    int choice1, choice2, choice3, choice4;
+    char choice1, choice2, choice3, choice4;
     do {
-        cout << "        ┌------------------------┐\n";
-        cout << "            #欢迎使用ATM仿真软件#\n\n";
-        cout << "              【1】 管理员登录     \n";
-        cout << "              【2】 用户登录     \n";
-        cout << "              【0】 退出软件     \n\n";
-        cout << "        └------------------------┘\n";
+        cout << " ----------------------------------------- \n";
+        cout << "|           _      _____   __  __         |\n"
+             << "|          / \\    |_   _| |  \\/  |        |\n"
+             << "|         / _ \\     | |   | |\\/| |        |\n"
+             << "|        / ___ \\    | |   | |  | |        |\n"
+             << "|       /_/   \\_\\   |_|   |_|  |_|        |\n";
+        cout << "|    ____            _                    |\n"
+             << "|   / ___| _   _ ___| |_ ___ _ __ ___     |\n"
+             << "|   \\___ \\| | | / __| __/ _ \\ '_ ` _  \\   |\n"
+             << "|    ___) | |_| \\__ \\ ||  __/ | | | | |   |\n"
+             << "|   |____/ \\__, |___/\\__\\___|_| |_| |_|   |\n"
+             << "|          |___/                          |\n";
+        cout << "|             【1】 管理员登录\t          |\n";
+        cout << "|             【2】 用户登录\t          |\n";
+        cout << "|             【0】 退出软件\t          |\n";
+        cout << " ----------------------------------------- \n";
         cin >> choice1;
         switch (choice1) {
-            case 1:
+            case '1':
                 adminSignIn();
                 if (!isAdmin) {
                     break;
                 }
                 do {
-                    cout << "        ┌------------------------┐\n";
-                    cout << "                 #账户管理#\n\n";
+                    cout << " ----------------------------------------- \n";
+                    cout << "     _          _               _         \n"
+                         << "    / \\      __| |  _ __ ___   (_)  _ __  \n"
+                         << "   / _ \\    / _` | | '_ ` _ \\  | | | '_ \\ \n"
+                         << "  / ___ \\  | (_| | | | | | | | | | | | | |\n"
+                         << " /_/   \\_\\  \\__,_| |_| |_| |_| |_| |_| |_|\n"
+                         << "                                          \n";
                     cout << "              【1】 开户\n";
                     cout << "              【2】 销户\n";
                     cout << "              【3】 修改密码\n";
                     cout << "              【0】 退出登录\n\n";
-                    cout << "        └------------------------┘\n";
+                    cout << " ----------------------------------------- \n";
                     cin >> choice2;
                     switch (choice2) {
-                        case 1:
+                        case '1':
                             cout << "        ┌------------------------┐\n";
                             cout << "                   #开户#\n";
                             cout << "        └------------------------┘\n";
                             cout << "              #录入账户信息#\n";
                             signUp();
                             break;
-                        case 2:
+                        case '2':
                             cout << "        ┌------------------------┐\n";
                             cout << "                  #销户#\n\n";
                             deleteAccount();
                             break;
-                        case 3:
+                        case '3':
                             cout << "        ┌------------------------┐\n";
                             cout << "                 #修改密码#\n\n";
                             changePassword();
                             break;
-                        case 0:
+                        case '0':
                             signOut();
                             break;
                         default:
                             cout << "输入错误，请重新输入!\n";
                     }
-                } while (choice2 != 0);
+                } while (choice2 != '0');
                 break;
-            case 2:
+            case '2':
                 signIn();
                 if (!currAccount) {
                     continue;
                 }
                 do {
-                    cout << "        ┌------------------------┐\n";
-                    cout << "              #欢迎" << currAccount->name << "#\n\n";
+                    cout << " ------------------------------------------ \n";
+                    cout << " __        __   _                          \n"
+                         << " \\ \\      / /__| | ___ ___  _ __ ___   ___ \n"
+                         << "  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\\n"
+                         << "   \\ V  V /  __/ | (_| (_) | | | | | |  __/\n"
+                         << "    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|\n"
+                         << "               用户：" << currAccount->name << endl;
                     cout << "              【1】 存款\n";
                     cout << "              【2】 取款\n";
                     cout << "              【3】 账户查询\n";
@@ -468,20 +488,25 @@ void System::mainMenu() {
                     cout << "              【5】 修改密码\n";
                     cout << "              【6】 销户\n";
                     cout << "              【0】 退出\n\n";
-                    cout << "        └------------------------┘\n";
+                    cout << " ------------------------------------------ \n";
                     cin >> choice3;
+                    if (cin.fail())//输入数据超过int_max
+                    {
+                        cin.clear(); //清除std::cin的错误状态
+                        cin.sync(); //清空输入缓冲区
+                    }
                     switch (choice3) {
-                        case 1:
+                        case '1':
                             cout << "        ┌------------------------┐\n";
                             cout << "                  #存款#\n\n";
                             deposit();
                             break;
-                        case 2:
+                        case '2':
                             cout << "        ┌------------------------┐\n";
                             cout << "                 #取款#\n\n";
                             withdrawal();
                             break;
-                        case 3:
+                        case '3':
                             do {
                                 cout << "        ┌------------------------┐\n";
                                 cout << "                  #查询#\n\n";
@@ -491,53 +516,55 @@ void System::mainMenu() {
                                 cout << "        └------------------------┘\n";
                                 cin >> choice4;
                                 switch (choice4) {
-                                    case 1:
+                                    case '1':
                                         cout << "        ┌------------------------┐\n";
                                         cout << "                 #余额#\n\n";
                                         showBalance();
                                         break;
-                                    case 2:
+                                    case '2':
                                         cout << "        ┌------------------------┐\n";
                                         cout << "                 #交易记录#\n\n";
                                         Record::exportTransactionHistory(currAccount->transactionHistory);
                                         break;
-                                    case 0:
+                                    case '0':
                                         break;
                                     default:
                                         cout << "输入错误，请重新输入!\n";
                                 }
-                            } while (choice4 != 0);
+                            } while (choice4 != '0');
                             break;
-                        case 4:
+                        case '4':
                             cout << "        ┌------------------------┐\n";
                             cout << "                 #转账#\n\n";
                             transfer();
                             break;
-                        case 5:
+                        case '5':
                             cout << "        ┌------------------------┐\n";
                             cout << "                #修改密码#\n\n";
                             changePassword();
                             break;
-                        case 6:
+                        case '6':
                             cout << "        ┌------------------------┐\n";
                             cout << "                  #销户#\n\n";
                             deleteAccount();
+                            choice3 = '0';
                             break;
-                        case 0:
+                        case '0':
                             signOut();
                             break;
                         default:
                             cout << "输入错误，请重新输入!\n";
+                            break;
                     }
-                } while (choice3 != 0);
+                } while (choice3 != '0');
                 break;
-            case 0:
+            case '0':
                 printf("感谢您的使用!\n");
                 break;
             default:
                 printf("输入错误，请重新输入!\n");
         }
-    } while (choice1 != 0);
+    } while (choice1 != '0');
     exit(0);
 }
 
