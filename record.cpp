@@ -3,12 +3,14 @@
 
 using std::cout;
 
+//在写入string变量时，先写入该string的长度，以便后续读取时确定string的长度
 inline void Record::writeString(ofstream &fout, const string &s) {
 	auto len = s.size();
     fout.write((const char *) &len, 4);
     fout.write(s.data(), s.size());
 }
 
+//先读取一个长度len，再根据len读取string
 inline void Record::readString(ifstream &fin, string &s) {
 	int len;
     fin.read((char *) &len, 4);
@@ -21,7 +23,7 @@ inline void Record::readString(ifstream &fin, string &s) {
     }
 }
 
-
+//根据存储的数据格式逐一读取数据
 void Record::loadRecord(vector<Account> &accounts) {
 	ifstream fin("ATM_sys.dat", ifstream::in | ifstream::binary);
 
@@ -77,6 +79,7 @@ void Record::loadRecord(vector<Account> &accounts) {
     fin.close();
 }
 
+//根据Account类内的数据，注意写入所有账户信息
 void Record::saveRecord(const vector<Account> &accounts) {
     ofstream fout("ATM_sys.dat", ofstream::out | ofstream::trunc | ofstream::binary);
     if (!fout) return;
@@ -114,6 +117,7 @@ void Record::saveRecord(const vector<Account> &accounts) {
     fout.close();
 }
 
+//输出单次交易的编号
 void Record::printVoucher(const Account::Transaction &transaction) {
     cout << "交易编号：" << transaction.transactionId << endl;
     cout << "交易时间：" << transaction.transactionTime << endl;
@@ -135,6 +139,7 @@ void Record::printVoucher(const Account::Transaction &transaction) {
     }
 }
 
+//输出所有历史交易记录的编号
 void Record::exportTransactionHistory(const vector<Account::Transaction> &transactionHistory) {
     for (const auto &transaction: transactionHistory) {
         cout << "交易编号：" << transaction.transactionId << endl;

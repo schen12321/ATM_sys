@@ -11,17 +11,10 @@
 #include <cstdlib>
 #include "record.h"
 #include "MD5.h"
-#include "snack.h"
 #include <conio.h>
 
-using std::cout;
-using std::cin;
-using std::unordered_map;
-using std::swap;
-using std::ios;
-using std::setprecision;
-using std::stringstream;
 using namespace std;
+
 class System {
     vector<Account> accounts;                                        //记录所有用户数据
     unordered_map<string, Account *> accountIndex;                   //以卡号为键创建用户索引
@@ -69,16 +62,12 @@ private:
     //负责实现余额查询功能
     int showBalance();
 
-    //点击按钮可以进行登录与退出，并处理各种可能发生的错误
-    void signInMenu();
-
-    //点击按钮可以进行相应的操作，并处理各种可能发生的错误
+    //负责实现菜单的显示
     void mainMenu();
 
     //获取时间戳
     static string getTimestamp();
 
     //获取格式化的当前时间（如："2021-09-09 22:02:35"）
-    //话说这几天每天都写代码到十一点多，要秃了要秃了
     static string getCurrentTime();
 };

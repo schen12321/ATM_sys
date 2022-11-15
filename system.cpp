@@ -340,6 +340,7 @@ int System::withdrawal() {
     }
     if (withdrawal_amount_str.length() >= 10) {
         cout << "ÊäÈë´íÎó" << endl;
+        return -1;
     }
     if (withdrawal_amount <= 0) {
         cout << "ÊäÈë´íÎó" << endl;
@@ -411,6 +412,7 @@ int System::transfer() {
     }
     if (transfer_amount_str.length() >= 10) {
         cout << "ÊäÈë´íÎó" << endl;
+        return -2;
     }
     if (transfer_amount <= 0) {
         cout << "ÊäÈë´íÎó" << endl;
@@ -520,15 +522,6 @@ void System::mainMenu() {
         }
         system("cls");
         switch (index1) {
-            case 3:
-                system("mode con cols=120 lines=42");
-                try{
-                    snakeGame game;
-                }
-                catch(runtime_error &gameEnd) { //½áÊø
-                    system("cls");
-                }
-                break;
             case 0:
                 cout << " ----------------------------------------- \n";
                 cout << "         _     ___   ____ ___ _   _ \n"

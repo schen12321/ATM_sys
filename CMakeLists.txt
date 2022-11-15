@@ -15,5 +15,5 @@ add_executable(ATM_sys
         record.cpp
         record.h
         system.cpp
-        system.h snack.h)
+        system.h)
 
