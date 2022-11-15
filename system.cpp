@@ -1,5 +1,12 @@
 #include "system.h"
 
+void goToScreen(int xx, int yy)
+{
+    COORD scrn;
+    HANDLE hOuput = GetStdHandle(STD_OUTPUT_HANDLE);
+    scrn.X = xx; scrn.Y = yy;
+    SetConsoleCursorPosition(hOuput, scrn);
+}
 
 System::System() {
     Record::loadRecord(accounts);
@@ -29,6 +36,7 @@ int System::signIn() {
     cout << "请输入您的密码:";
     cin >> passwd;
     passwd = MD5(passwd).toStr();
+    cout << accountIndex[id]->passwd;
     if (accountIndex[id]->passwd != passwd) {
         cout << "密码错误";
         accountIndex[id]->wrongPasswdLeft -= 1;
@@ -224,6 +232,9 @@ int System::deleteAccount() {
         swap(*accountIndex[id], *(accounts.end() - 1));
         accounts.pop_back();
         accountIndex.erase(id);
+        for (auto &acc: accounts) {
+            accountIndex[acc.id] = &(acc);
+        }
         Record::saveRecord(accounts);
         cout << "账户注销成功" << endl;
         return 1;
@@ -261,472 +272,565 @@ int System::showBalance() {
     return 1;
 }
 
-    int System::deposit() {
-        if (!currAccount) {
-            cout << "Error: 账户未登录" << endl;
-            return -1;
-        }
-        string deposit_amount_str;
-        cout << "请输入存款金额:";
-        cin >> deposit_amount_str;
-        double deposit_amount;
-        try {
-            deposit_amount = stod(deposit_amount_str);
-        }
-        catch (...) {
-            cout << "输入错误" << endl;
-            return -1;
-        }
-        if (deposit_amount_str.length() >= 10) {
-            cout << "输入错误" << endl;
-        }
-        if (deposit_amount <= 0) {
-            cout << "输入错误" << endl;
-            return -2;
-        }
-        if (deposit_amount > 10000) {
-            cout << "单笔存款不得超过 10000 元" << endl;
-            return -2;
-        }
-        if ((int) (deposit_amount / 100) * 100 != deposit_amount) {
-            cout << "存款金额必须为100的整数倍" << endl;
-            return -3;
-        }
-        cout << "请确认 存款金额为 " << setiosflags(ios::fixed) << setprecision(2) << deposit_amount << " 元<Y/N>:";
-        char ch;
-        cin >> ch;
-        if (ch != 'y' && ch != 'Y')
-            cout << "取消操作" << endl;
-        currAccount->deposit(deposit_amount, getTimestamp(), getCurrentTime());
-        cout << "成功存款 " << deposit_amount << " 元" << endl;
-        cout << "当前余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元" << endl;
-        cout << "是否打印凭证<Y/N>:";
-        cin >> ch;
-        if (ch == 'y' || ch == 'Y')
-            Record::printVoucher(currAccount->transactionHistory.back());
-        Record::saveRecord(accounts);
-        return 1;
+int System::deposit() {
+    if (!currAccount) {
+        cout << "Error: 账户未登录" << endl;
+        return -1;
     }
-
-    int System::withdrawal() {
-        if (!currAccount) {
-            cout << "Error: 账户未登录" << endl;
-            return -1;
-        }
-        string withdrawal_amount_str;
-        cout << "请输入取款金额:";
-        cin >> withdrawal_amount_str;
-        double withdrawal_amount;
-        try {
-            withdrawal_amount = stod(withdrawal_amount_str);
-        }
-        catch (...) {
-            cout << "输入错误" << endl;
-            return -1;
-        }
-        if (withdrawal_amount_str.length() >= 10) {
-            cout << "输入错误" << endl;
-        }
-        if (withdrawal_amount <= 0) {
-            cout << "输入错误" << endl;
-            return -2;
-        }
-        if (withdrawal_amount > 10000) {
-            cout << "单笔取款不得超过 10000 元" << endl;
-            return -2;
-        }
-        if ((int) (withdrawal_amount / 100) * 100 != withdrawal_amount) {
-            cout << "取款金额必须为100的整数倍" << endl;
-            return -3;
-        }
-        if (withdrawal_amount > currAccount->balance) {
-            cout << "余额不足, 您的余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance
-                 << " 元"
-                 << endl;
-            return -4;
-        }
-        cout << "请确认 取款金额为 " << setiosflags(ios::fixed) << setprecision(2) << withdrawal_amount << " 元<Y/N>:";
-        char ch;
-        cin >> ch;
-        if (ch != 'y' && ch != 'Y') {
-            cout << "操作取消" << endl;
-            return -5;
-        }
-        currAccount->withdrawal(withdrawal_amount, getTimestamp(), getCurrentTime());
-        cout << "成功取款 " << withdrawal_amount << " 元" << endl;
-        cout << "当前余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元" << endl;
-        cout << "正在出钞, 请稍后..." << endl;
-        sleep(2);
-        cout << "请取回您的现金" << endl;
-        cout << "是否打印凭证<Y/N>:";
-        cin >> ch;
-        if (ch == 'y' || ch == 'Y')
-            Record::printVoucher(currAccount->transactionHistory.back());
-        Record::saveRecord(accounts);
-        return 1;
+    string deposit_amount_str;
+    cout << "请输入存款金额:";
+    cin >> deposit_amount_str;
+    double deposit_amount;
+    try {
+        deposit_amount = stod(deposit_amount_str);
     }
+    catch (...) {
+        cout << "输入错误" << endl;
+        return -1;
+    }
+    if (deposit_amount_str.length() >= 10) {
+        cout << "输入错误" << endl;
+        return -2;
+    }
+    if (deposit_amount <= 0) {
+        cout << "输入错误" << endl;
+        return -2;
+    }
+    if (deposit_amount > 10000) {
+        cout << "单笔存款不得超过 10000 元" << endl;
+        return -2;
+    }
+    if ((int) (deposit_amount / 100) * 100 != deposit_amount) {
+        cout << "存款金额必须为100的整数倍" << endl;
+        return -3;
+    }
+    cout << "请确认 存款金额为 " << setiosflags(ios::fixed) << setprecision(2) << deposit_amount << " 元<Y/N>:";
+    char ch;
+    cin >> ch;
+    if (ch != 'y' && ch != 'Y') {
+        cout << "取消操作" << endl;
+        return -4;
+    }
+    currAccount->deposit(deposit_amount, getTimestamp(), getCurrentTime());
+    cout << "成功存款 " << deposit_amount << " 元" << endl;
+    cout << "当前余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元" << endl;
+    cout << "是否打印凭证<Y/N>:";
+    cin >> ch;
+    if (ch == 'y' || ch == 'Y')
+        Record::printVoucher(currAccount->transactionHistory.back());
+    Record::saveRecord(accounts);
+    return 1;
+}
 
-    int System::transfer() {
-        if (!currAccount) {
-            cout << "Error: 账户未登录" << endl;
-            return -1;
-        }
-        string toId, toId_copy;
-        cout << "请输入对方卡号:";
-        cin >> toId;
-        toId_copy = toId;
-        toId = MD5(toId).toStr();
-        if (!accountIndex.count(toId)) {
-            cout << "卡号不存在" << endl;
-            return -1;
-        }
-        if (toId_copy == currAccountId) {
-            cout << "转账对象不能为自身" << endl;
-            return -3;
-        }
-        string transfer_amount_str;
-        double transfer_amount;
-        cout << "请输入转账金额:";
-        cin >> transfer_amount_str;
-        try {
-            transfer_amount = stod(transfer_amount_str);
-        }
-        catch (...) {
-            cout << "输入错误" << endl;
-            return -2;
-        }
-        if (transfer_amount_str.length() >= 10) {
-            cout << "输入错误" << endl;
-        }
-        if (transfer_amount <= 0) {
-            cout << "输入错误" << endl;
-            return -3;
-        }
-        if (transfer_amount > 50000) {
-            cout << "单笔转账金额不得超过 50000 元" << endl;
-            return -3;
-        }
-        if (transfer_amount > currAccount->balance) {
-            cout << "余额不足, 您的余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance
-                 << " 元"
-                 << endl;
-            return -4;
-        }
-        cout << "您将转账给 " << toId_copy << " " << setiosflags(ios::fixed) << setprecision(2) << transfer_amount
-             << " 元<Y/N>:";
-        char ch;
-        cin >> ch;
-        if (ch != 'y' && ch != 'Y') {
-            cout << "操作取消" << endl;
-            return -5;
-        }
-
-        auto timestamp = getTimestamp();
-        auto currTime = getCurrentTime();
-        currAccount->transferOut(stod(transfer_amount_str), toId_copy, timestamp, currTime);
-        accountIndex[toId]->transferIn(stod(transfer_amount_str), currAccountId, timestamp, currTime);
-        cout << "成功转账给 " << toId_copy << " " << setiosflags(ios::fixed) << setprecision(2) << transfer_amount
+int System::withdrawal() {
+    if (!currAccount) {
+        cout << "Error: 账户未登录" << endl;
+        return -1;
+    }
+    string withdrawal_amount_str;
+    cout << "请输入取款金额:";
+    cin >> withdrawal_amount_str;
+    double withdrawal_amount;
+    try {
+        withdrawal_amount = stod(withdrawal_amount_str);
+    }
+    catch (...) {
+        cout << "输入错误" << endl;
+        return -1;
+    }
+    if (withdrawal_amount_str.length() >= 10) {
+        cout << "输入错误" << endl;
+    }
+    if (withdrawal_amount <= 0) {
+        cout << "输入错误" << endl;
+        return -2;
+    }
+    if (withdrawal_amount > 10000) {
+        cout << "单笔取款不得超过 10000 元" << endl;
+        return -2;
+    }
+    if ((int) (withdrawal_amount / 100) * 100 != withdrawal_amount) {
+        cout << "取款金额必须为100的整数倍" << endl;
+        return -3;
+    }
+    if (withdrawal_amount > currAccount->balance) {
+        cout << "余额不足, 您的余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance
              << " 元"
              << endl;
-        cout << "当前余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元" << endl;
-        cout << "是否打印凭证<Y/N>:";
-        cin >> ch;
-        if (ch == 'y' || ch == 'Y')
-            Record::printVoucher(currAccount->transactionHistory.back());
-        Record::saveRecord(accounts);
-        return 1;
+        return -4;
+    }
+    cout << "请确认 取款金额为 " << setiosflags(ios::fixed) << setprecision(2) << withdrawal_amount << " 元<Y/N>:";
+    char ch;
+    cin >> ch;
+    if (ch != 'y' && ch != 'Y') {
+        cout << "操作取消" << endl;
+        return -5;
+    }
+    currAccount->withdrawal(withdrawal_amount, getTimestamp(), getCurrentTime());
+    cout << "成功取款 " << withdrawal_amount << " 元" << endl;
+    cout << "当前余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元" << endl;
+    cout << "正在出钞, 请稍后..." << endl;
+    sleep(2);
+    cout << "请取回您的现金" << endl;
+    cout << "是否打印凭证<Y/N>:";
+    cin >> ch;
+    if (ch == 'y' || ch == 'Y')
+        Record::printVoucher(currAccount->transactionHistory.back());
+    Record::saveRecord(accounts);
+    return 1;
+}
+
+int System::transfer() {
+    if (!currAccount) {
+        cout << "Error: 账户未登录" << endl;
+        return -1;
+    }
+    string toId, toId_copy;
+    cout << "请输入对方卡号:";
+    cin >> toId;
+    toId_copy = toId;
+    toId = MD5(toId).toStr();
+    if (!accountIndex.count(toId)) {
+        cout << "卡号不存在" << endl;
+        return -1;
+    }
+    if (toId_copy == currAccountId) {
+        cout << "转账对象不能为自身" << endl;
+        return -3;
+    }
+    string transfer_amount_str;
+    double transfer_amount;
+    cout << "请输入转账金额:";
+    cin >> transfer_amount_str;
+    try {
+        transfer_amount = stod(transfer_amount_str);
+    }
+    catch (...) {
+        cout << "输入错误" << endl;
+        return -2;
+    }
+    if (transfer_amount_str.length() >= 10) {
+        cout << "输入错误" << endl;
+    }
+    if (transfer_amount <= 0) {
+        cout << "输入错误" << endl;
+        return -3;
+    }
+    if (transfer_amount > 50000) {
+        cout << "单笔转账金额不得超过 50000 元" << endl;
+        return -3;
+    }
+    if (transfer_amount > currAccount->balance) {
+        cout << "余额不足, 您的余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance
+             << " 元"
+             << endl;
+        return -4;
+    }
+    cout << "您将转账给 " << toId_copy << " " << setiosflags(ios::fixed) << setprecision(2) << transfer_amount
+         << " 元<Y/N>:";
+    char ch;
+    cin >> ch;
+    if (ch != 'y' && ch != 'Y') {
+        cout << "操作取消" << endl;
+        return -5;
     }
 
-    void System::mainMenu() {
-        char choice1, choice2, choice3, choice4;
-        do {
-            cout << "+-----------------------------------------+\n";
-            cout << "|           _      _____   __  __         |\n"
-                 << "|          / \\    |_   _| |  \\/  |        |\n"
-                 << "|         / _ \\     | |   | |\\/| |        |\n"
-                 << "|        / ___ \\    | |   | |  | |        |\n"
-                 << "|       /_/   \\_\\   |_|   |_|  |_|        |\n";
-            cout << "|    ____            _                    |\n"
-                 << "|   / ___| _   _ ___| |_ ___ _ __ ___     |\n"
-                 << "|   \\___ \\| | | / __| __/ _ \\ '_ ` _  \\   |\n"
-                 << "|    ___) | |_| \\__ \\ ||  __/ | | | | |   |\n"
-                 << "|   |____/ \\__, |___/\\__\\___|_| |_| |_|   |\n"
-                 << "|          |___/                          |\n";
-            cout << "|                                         |\n";
-            cout << "|             【1】 管理员登录\t          |\n";
-            cout << "|                                         |\n";
-            cout << "|             【2】 用户登录\t          |\n";
-            cout << "|                                         |\n";
-            cout << "|             【0】 退出软件\t          |\n";
-            cout << "|                                         |\n";
-            cout << "+-----------------------------------------+\n";
-            cin >> choice1;
-            cin.sync(); //清空输入缓冲区
-            system ("cls");
-            switch (choice1) {
-                case '3':
-                    system("mode con cols=120 lines=42");
-                    try{
-                        snakeGame game;
-                    }
-                    catch(runtime_error &gameEnd) { //结束
-                        system("cls");
-                    }
+    auto timestamp = getTimestamp();
+    auto currTime = getCurrentTime();
+    currAccount->transferOut(stod(transfer_amount_str), toId_copy, timestamp, currTime);
+    accountIndex[toId]->transferIn(stod(transfer_amount_str), currAccountId, timestamp, currTime);
+    cout << "成功转账给 " << toId_copy << " " << setiosflags(ios::fixed) << setprecision(2) << transfer_amount
+         << " 元"
+         << endl;
+    cout << "当前余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元" << endl;
+    cout << "是否打印凭证<Y/N>:";
+    cin >> ch;
+    if (ch == 'y' || ch == 'Y')
+        Record::printVoucher(currAccount->transactionHistory.back());
+    Record::saveRecord(accounts);
+    return 1;
+}
+
+void System::mainMenu() {
+    char choice1, choice2, choice3, choice4;
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO CursorInfo;
+    GetConsoleCursorInfo(handle, &CursorInfo);//获取控制台光标信息
+    CursorInfo.bVisible = false; //隐藏控制台光标
+    SetConsoleCursorInfo(handle, &CursorInfo);//设置控制台光标状态
+    int index1 = 0, index2 = 0, index3 = 0, index4 = 0;
+    int ch;
+    do {
+        cout << "+-----------------------------------------+\n";
+        cout << "|           _      _____   __  __         |\n"
+             << "|          / \\    |_   _| |  \\/  |        |\n"
+             << "|         / _ \\     | |   | |\\/| |        |\n"
+             << "|        / ___ \\    | |   | |  | |        |\n"
+             << "|       /_/   \\_\\   |_|   |_|  |_|        |\n";
+        cout << "|    ____            _                    |\n"
+             << "|   / ___| _   _ ___| |_ ___ _ __ ___     |\n"
+             << "|   \\___ \\| | | / __| __/ _ \\ '_ ` _  \\   |\n"
+             << "|    ___) | |_| \\__ \\ ||  __/ | | | | |   |\n"
+             << "|   |____/ \\__, |___/\\__\\___|_| |_| |_|   |\n"
+             << "|          |___/                          |\n";
+        cout << "|                                         |\n";
+        cout << "|                                         |\n";
+        cout << "|                                         |\n";
+        cout << "|                                         |\n";
+        cout << "|                                         |\n";
+        cout << "|                                         |\n";
+        cout << "|                                         |\n";
+        cout << "+-----------------------------------------+\n";
+        string select1[] = { "管理员登录","用户登录","退出软件" };
+        string arrow = "-> ";
+        for (int i = 0; i < 3; i++) {
+            goToScreen(16, 13 + 2 * i);
+            cout << select1[i];
+        }
+        goToScreen(12, 13 + 2 * index1);
+        cout << arrow << "  " << select1[index1];
+
+        while (true) {
+            if (_kbhit()) {
+                ch = _getch();//not print at screen
+                if (ch == 13) {
                     break;
-                case '1':
-                    cout << " ----------------------------------------- \n";
-                    cout << "         _     ___   ____ ___ _   _ \n"
-                         << "        | |   / _ \\ / ___|_ _| \\ | |\n"
-                         << "        | |  | | | | |  _ | ||  \\| |\n"
-                         << "        | |__| |_| | |_| || || |\\  |\n"
-                         << "        |_____\\___/ \\____|___|_| \\_|\n\n";
-                    cout << " ----------------------------------------- \n";
-                    adminSignIn();
-                    if (!isAdmin) {
-                        system ("pause");
-                        system ("cls");
-                        break;
-                    }
-                    system ("cls");
-                    do {
-                        cout << " ----------------------------------------- \n";
-                        cout << "     _          _               _         \n"
-                             << "    / \\      __| |  _ __ ___   (_)  _ __  \n"
-                             << "   / _ \\    / _` | | '_ ` _ \\  | | | '_ \\ \n"
-                             << "  / ___ \\  | (_| | | | | | | | | | | | | |\n"
-                             << " /_/   \\_\\  \\__,_| |_| |_| |_| |_| |_| |_|\n"
-                             << "                                          \n";
-                        cout << "              【1】 开户\n";
-                        cout << "              【2】 销户\n";
-                        cout << "              【3】 修改密码\n";
-                        cout << "              【0】 退出登录\n\n";
-                        cout << " ----------------------------------------- \n";
-                        cin >> choice2;
-                        cin.sync(); //清空输入缓冲区
-                        system ("cls");
-                        switch (choice2) {
-                            case '1':
-                                cout << " ------------------------------------------ \n";
-                                cout << "                   #开户#\n";
-                                cout << " ------------------------------------------ \n";
-                                cout << "              #录入账户信息#\n";
-                                signUp();
-                                system ("pause");
-                                system ("cls");
-                                break;
-                            case '2':
-                                cout << " ------------------------------------------ \n";
-                                cout << "                  #销户#\n\n";
-                                deleteAccount();
-                                system ("pause");
-                                system ("cls");
-                                break;
-                            case '3':
-                                cout << " ------------------------------------------ \n";
-                                cout << "                 #修改密码#\n\n";
-                                changePassword();
-                                system ("pause");
-                                system ("cls");
-                                break;
-                            case '0':
-                                signOut();
-                                //system ("pause");
-                                system ("cls");
-                                break;
-                            default:
-                                cout << "输入错误，请重新输入!\n";
-                                system ("pause");
-                                system ("cls");
-                        }
-                    } while (choice2 != '0');
-                    break;
-                case '2':
-                    cout << " ----------------------------------------- \n";
-                    cout << "         _     ___   ____ ___ _   _ \n"
-                         << "        | |   / _ \\ / ___|_ _| \\ | |\n"
-                         << "        | |  | | | | |  _ | ||  \\| |\n"
-                         << "        | |__| |_| | |_| || || |\\  |\n"
-                         << "        |_____\\___/ \\____|___|_| \\_|\n\n";
-                    cout << " ----------------------------------------- \n";
-                    signIn();
-                    if (!currAccount) {
-                        system("pause");
-                        system("cls");
-                        continue;
-                    }
+                }
+                else if (ch == 72) {//up
+                    printf("\r|%*c|\r", 41, ' ');
+                    goToScreen(16, 13 + 2 * index1);
+                    cout << select1[index1];
+                    index1--;
+                }
+                else if (ch == 80) {//down
+                    printf("\r|%*c|\r", 41, ' ');
+                    goToScreen(16, 13 + 2 * index1);
+                    cout << select1[index1];
+                    index1++;
+                }
+                if (index1 < 0) {
+                    index1 = 2;
+                }
+                else if (index1 > 2) {
+                    index1 = 0;
+                }
+                goToScreen(12, 13 + 2 * index1);
+                cout << arrow << "  " << select1[index1];
+            }
+        }
+        system("cls");
+        switch (index1) {
+            case 3:
+                system("mode con cols=120 lines=42");
+                try{
+                    snakeGame game;
+                }
+                catch(runtime_error &gameEnd) { //结束
                     system("cls");
-                    do {
-                        cout << "+--------------------------------------------+\n";
-                        cout << "| __        __   _                           |\n"
-                             << "| \\ \\      / /__| | ___ ___  _ __ ___   ___  |\n"
-                             << "|  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ |\n"
-                             << "|   \\ V  V /  __/ | (_| (_) | | | | | |  __/ |\n"
-                             << "|    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___| |\n"
-                             << "|                                            |\n";
-                        cout << "|               用户：" << currAccount->name << "\t                     |" << endl;
-                        cout << "|              【1】 存款\t             |\n";
-                        cout << "|              【2】 取款\t             |\n";
-                        cout << "|              【3】 转账\t             |\n";
-                        cout << "|              【4】 账户查询\t             |\n";
-                        cout << "|              【5】 修改密码\t             |\n";
-                        cout << "|              【6】 销户\t             |\n";
-                        cout << "|              【0】 退出\t             |\n";
-                        cout << "+--------------------------------------------+\n";
-                        cin >> choice3;
-                        cin.sync(); //清空输入缓冲区
-                        system ("cls");
-                        switch (choice3) {
-                            case '1':
-                                cout << " ------------------------------------------ \n";
-                                cout << "                   #存款#\n\n";
-                                deposit();
-                                system ("pause");
-                                system ("cls");
-                                break;
-                            case '2':
-                                cout << " ------------------------------------------ \n";
-                                cout << "                 #取款#\n\n";
-                                withdrawal();
-                                system ("pause");
-                                system ("cls");
-                                break;
-                            case '3':
-                                cout << " ------------------------------------------ \n";
-                                cout << "                 #转账#\n\n";
-                                transfer();
-                                system ("pause");
-                                system ("cls");
-                                break;
-                            case '4':
-                                do {
-                                    cout << " ------------------------------------------ \n\n";
-                                    cout << "                   #查询#\n\n";
-                                    cout << "                【1】 余额\n";
-                                    cout << "                【2】 交易记录\n";
-                                    cout << "                【0】 返回\n\n";
-                                    cout << " ------------------------------------------ \n\n";
-                                    cin >> choice4;
-                                    cin.sync(); //清空输入缓冲区
-                                    system ("cls");
-                                    switch (choice4) {
-                                        case '1':
-                                            cout << " ------------------------------------------ \n";
-                                            cout << "                 #余额#\n\n";
-                                            showBalance();
-                                            system ("pause");
-                                            system ("cls");
-                                            break;
-                                        case '2':
-                                            cout << " ------------------------------------------ \n";
-                                            cout << "                 #交易记录#\n\n";
-                                            Record::exportTransactionHistory(currAccount->transactionHistory);
-                                            system ("pause");
-                                            system ("cls");
-                                            break;
-                                        case '0':
-                                            system ("cls");
-                                            break;
-                                        default:
-                                            cout << "输入错误，请重新输入!\n";
-                                            system ("pause");
-                                            system ("cls");
-                                    }
-                                } while (choice4 != '0');
-                                break;
-                            case '5':
-                                cout << " ------------------------------------------ \n";
-                                cout << "                #修改密码#\n\n";
-                                changePassword();
-                                system ("pause");
-                                system ("cls");
-                                break;
-                            case '6':
-                                cout << " ------------------------------------------ \n";
-                                cout << "                  #销户#\n\n";
-                                deleteAccount();
-                                system ("pause");
-                                system ("cls");
-                                choice3 = '0';
-                                break;
-                            case '0':
-                                signOut();
-                                system ("cls");
-                                break;
-                            default:
-                                cout << "输入错误，请重新输入!\n";
-                                system ("pause");
-                                system ("cls");
-                                break;
-                        }
-                    } while (choice3 != '0');
-                    break;
-                case '0':
-                    cout << "   ____                 _ ____            /\\/|\n"
-                         << "  / ___| ___   ___   __| | __ ) _   _  __|/\\/ \n"
-                         << " | |  _ / _ \\ / _ \\ / _` |  _ \\| | | |/ _ \\   \n"
-                         << " | |_| | (_) | (_) | (_| | |_) | |_| |  __/   \n"
-                         << "  \\____|\\___/ \\___/ \\__,_|____/ \\__, |\\___|   \n"
-                         << "                                |___/         \n";
-                    sleep(1);
-                    exit(0);
-                    break;
-                default:
-                    printf("输入错误，请重新输入!\n");
+                }
+                break;
+            case 0:
+                cout << " ----------------------------------------- \n";
+                cout << "         _     ___   ____ ___ _   _ \n"
+                     << "        | |   / _ \\ / ___|_ _| \\ | |\n"
+                     << "        | |  | | | | |  _ | ||  \\| |\n"
+                     << "        | |__| |_| | |_| || || |\\  |\n"
+                     << "        |_____\\___/ \\____|___|_| \\_|\n\n";
+                cout << " ----------------------------------------- \n";
+                adminSignIn();
+                if (!isAdmin) {
                     system ("pause");
                     system ("cls");
-            }
-        } while (choice1 != '0');
-    }
+                    break;
+                }
+                system ("cls");
+                do {
 
-    string System::getTimestamp() {
-        timeb timestamp{};
-        ftime(&timestamp);
+                    cout << " ------------------------------------------ \n";
+                    cout << "|     _          _               _         |\n"
+                         << "|    / \\      __| |  _ __ ___   (_)  _ __  |\n"
+                         << "|   / _ \\    / _` | | '_ ` _ \\  | | | '_ \\ |\n"
+                         << "|  / ___ \\  | (_| | | | | | | | | | | | | ||\n"
+                         << "| /_/   \\_\\  \\__,_| |_| |_| |_| |_| |_| |_||\n"
+                         << "|                                          |\n";
+                    cout << "|                                          |\n";
+                    cout << "|                                          |\n";
+                    cout << "|                                          |\n";
+                    cout << "|                                          |\n";
+                    cout << " ------------------------------------------ \n";
+                    string select2[] = { "[  ]  开户", "[  ]  销户", "[  ]修改密码", "[  ]退出登录" };
 
-        //毫秒数可能不足三位，要补上0
-        stringstream ss;
-        ss << setw(3) << setfill('0') << timestamp.millitm;
+                    for (int i = 0; i < 4; i++) {
+                        goToScreen(16, 7 + i);
+                        cout << select2[i];
+                    }
+                    goToScreen(16, 7 + index2);
+                    cout << "[■]";
 
-        return to_string(timestamp.time) + ss.str();
-    }
+                    while (true) {
+                        if (_kbhit()) {
+                            ch = _getch();//not print at screen
+                            if (ch == 13) break;
+                            if (ch == 72) {//up
+                                printf("\r|%*c|\r", 42, ' ');
+                                goToScreen(16, 7 + index2);
+                                cout << select2[index2];
+                                index2--;
+                            }
+                            else if (ch == 80){//down
+                                printf("\r|%*c|\r", 42, ' ');
+                                goToScreen(16, 7 + index2);
+                                cout << select2[index2];
+                                index2++;
+                            }
+                            if (index2 < 0) {
+                                index2 = 3;
+                            }
+                            else if (index2 > 3) {
+                                index2 = 0;
+                            }
+
+                            goToScreen(16, 7 + index2);
+                            cout << "[■]";
+                        }
+                    }
+                    system ("cls");
+                    switch (index2) {
+                        case 0:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                   #开户#\n";
+                            cout << " ------------------------------------------ \n";
+                            cout << "              #录入账户信息#\n";
+                            signUp();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 1:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                  #销户#\n\n";
+                            deleteAccount();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 2:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                 #修改密码#\n\n";
+                            changePassword();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 3:
+                            signOut();
+                            //system ("pause");
+                            system ("cls");
+                            break;
+                        default:
+                            cout << "输入错误，请重新输入!\n";
+                            system ("pause");
+                            system ("cls");
+                    }
+                } while (index2 != 3);
+                break;
+            case 1:
+                cout << " ----------------------------------------- \n";
+                cout << "         _     ___   ____ ___ _   _ \n"
+                     << "        | |   / _ \\ / ___|_ _| \\ | |\n"
+                     << "        | |  | | | | |  _ | ||  \\| |\n"
+                     << "        | |__| |_| | |_| || || |\\  |\n"
+                     << "        |_____\\___/ \\____|___|_| \\_|\n\n";
+                cout << " ----------------------------------------- \n";
+                signIn();
+                if (!currAccount) {
+                    system("pause");
+                    system("cls");
+                    continue;
+                }
+                system("cls");
+                do {
+                    cout << "+--------------------------------------------+\n";
+                    cout << "| __        __   _                           |\n"
+                         << "| \\ \\      / /__| | ___ ___  _ __ ___   ___  |\n"
+                         << "|  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ |\n"
+                         << "|   \\ V  V /  __/ | (_| (_) | | | | | |  __/ |\n"
+                         << "|    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___| |\n"
+                         << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "|                                            |\n";
+                    cout << "+--------------------------------------------+\n";
+                    string select3[] = { "[  ]  存款", "[  ]  取款", "[  ]  转账", "[  ]查询余额", "[  ]交易记录", "[  ]修改密码", "[  ]  销户", "[  ]  退出" };
+                    goToScreen(15, 7);
+                    cout << "用户: " << currAccount->name;
+                    for (int i = 0; i < 8; i++) {
+                        goToScreen(15, 9 + i);
+                        cout << select3[i];
+                    }
+                    goToScreen(15, 9 + index3);
+                    cout << "[■]";
+
+                    while (true) {
+                        if (_kbhit()) {
+                            ch = _getch();//not print at screen
+                            if (ch == 13) {
+                                break;
+                            }
+                            else if (ch == 72) {//up
+                                printf("\r|%*c|\r", 44, ' ');
+                                goToScreen(15, 9 + index3);
+                                cout << select3[index3];
+                                index3--;
+                            }
+                            else if (ch == 80) {//down
+                                printf("\r|%*c|\r", 44, ' ');
+                                goToScreen(15, 9 + index3);
+                                cout << select3[index3];
+                                index3++;
+                            }
+                            if (index3 < 0) {
+                                index3 = 7;
+                            }
+                            else if (index3 > 7) {
+                                index3 = 0;
+                            }
+
+                            goToScreen(15, 9 + index3);
+                            cout << "[■]";
+                        }
+                    }
+                    cin.sync(); //清空输入缓冲区
+                    system ("cls");
+                    switch (index3) {
+                        case 0:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                   #存款#\n\n";
+                            deposit();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 1:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                 #取款#\n\n";
+                            withdrawal();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 2:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                 #转账#\n\n";
+                            transfer();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 3:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                 #余额#\n\n";
+                            showBalance();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 4:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                 #交易记录#\n\n";
+                            Record::exportTransactionHistory(currAccount->transactionHistory);
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 5:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                #修改密码#\n\n";
+                            changePassword();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 6:
+                            cout << " ------------------------------------------ \n";
+                            cout << "                  #销户#\n\n";
+                            deleteAccount();
+                            system ("pause");
+                            system ("cls");
+                            choice3 = '0';
+                            break;
+                        case 7:
+                            signOut();
+                            system ("cls");
+                            break;
+                    }
+                } while (index3 != 7);
+                break;
+            case 2:
+                cout << "   ____                 _ ____            /\\/|\n"
+                     << "  / ___| ___   ___   __| | __ ) _   _  __|/\\/ \n"
+                     << " | |  _ / _ \\ / _ \\ / _` |  _ \\| | | |/ _ \\   \n"
+                     << " | |_| | (_) | (_) | (_| | |_) | |_| |  __/   \n"
+                     << "  \\____|\\___/ \\___/ \\__,_|____/ \\__, |\\___|   \n"
+                     << "                                |___/         \n";
+                sleep(1);
+                exit(0);
+                break;
+            default:
+                printf("输入错误，请重新输入!\n");
+                system ("pause");
+                system ("cls");
+        }
+    } while (true);
+}
+
+string System::getTimestamp() {
+    timeb timestamp{};
+    ftime(&timestamp);
+
+    //毫秒数可能不足三位，要补上0
+    stringstream ss;
+    ss << setw(3) << setfill('0') << timestamp.millitm;
+
+    return to_string(timestamp.time) + ss.str();
+}
 
 //获取格式化的当前时间（如："2021-09-09 22:02:35"）
-    string System::getCurrentTime() {
-        //这两个变量用于获取当前时间哟
-        tm currTime{};
-        time_t timestamp = time(nullptr);
+string System::getCurrentTime() {
+    //这两个变量用于获取当前时间哟
+    tm currTime{};
+    time_t timestamp = time(nullptr);
 
-        localtime_s(&currTime, &timestamp);
+    localtime_s(&currTime, &timestamp);
 
-        //用于储存最终格式化的结果
-        string ans;
-        //用于格式化当前时间
-        stringstream ss;
+    //用于储存最终格式化的结果
+    string ans;
+    //用于格式化当前时间
+    stringstream ss;
 
-        //年
-        ans += to_string(1900 + currTime.tm_year) + "-";
+    //年
+    ans += to_string(1900 + currTime.tm_year) + "-";
 
-        //月
-        ss << setw(2) << setfill('0') << 1 + currTime.tm_mon;
-        ans += ss.str() + "-";
+    //月
+    ss << setw(2) << setfill('0') << 1 + currTime.tm_mon;
+    ans += ss.str() + "-";
 
-        //日
-        ss.str("");
-        ss << setw(2) << setfill('0') << currTime.tm_mday;
-        ans += ss.str() + " ";
+    //日
+    ss.str("");
+    ss << setw(2) << setfill('0') << currTime.tm_mday;
+    ans += ss.str() + " ";
 
-        //时
-        ss.str("");
-        ss << setw(2) << setfill('0') << currTime.tm_hour;
-        ans += ss.str() + ":";
+    //时
+    ss.str("");
+    ss << setw(2) << setfill('0') << currTime.tm_hour;
+    ans += ss.str() + ":";
 
-        //分
-        ss.str("");
-        ss << setw(2) << setfill('0') << currTime.tm_min;
-        ans += ss.str() + ":";
+    //分
+    ss.str("");
+    ss << setw(2) << setfill('0') << currTime.tm_min;
+    ans += ss.str() + ":";
 
-        //秒
-        ss.str("");
-        ss << setw(2) << setfill('0') << currTime.tm_sec;
-        ans += ss.str();
-        return ans;
-    }
+    //秒
+    ss.str("");
+    ss << setw(2) << setfill('0') << currTime.tm_sec;
+    ans += ss.str();
+    return ans;
+}

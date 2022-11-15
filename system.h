@@ -12,6 +12,7 @@
 #include "record.h"
 #include "MD5.h"
 #include "snack.h"
+#include <conio.h>
 
 using std::cout;
 using std::cin;
