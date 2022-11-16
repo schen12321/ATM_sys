@@ -255,7 +255,7 @@ int System::deleteAccount() {
         accountIndex.erase(currAccount->id);                      //注销成功
         swap(*currAccount, *(accounts.end() - 1));
         accounts.pop_back();
-        currAccount = nullptr;                                       //当前用户推出
+        currAccount = nullptr;                                       //当前用户退出
         currAccountId.clear();
         Record::saveRecord(accounts);
         cout << "账户注销成功" << endl;
@@ -461,9 +461,9 @@ int System::PredictBalance() {
     int number;
     int sum_x = 0;
     int sum_y = 0;
-    int currBalance[21];     /*数据样本*/
-    double theta1;       /* 一次项的系数*/
-    double e;            /*误差系数*/
+    int currBalance[21];
+    double theta1;
+    double e;
     double old_theta1;
     double old_theta0;
     Account::Transaction currtrans;
@@ -471,7 +471,7 @@ int System::PredictBalance() {
     int type;
     number = 21;
     currBalance[20] = currAccount->balance;
-    for (k = 19; k >= 0; k--) //y轴(每次交易后的余额)的写入
+    for (k = 19; k >= 0; k--)
     {
         currtrans = currAccount->transactionHistory[si + k - 20];
         type = currtrans.transactionType;
@@ -491,9 +491,8 @@ int System::PredictBalance() {
     }
     theta1 = (double) sum_y / sum_x;
     theta0 = currBalance[0];
-    while (1)                     /*开始迭代循环，直到找到最优解退出循环*/
+    while (1)                     //开始迭代循环，直到找到最优解退出循环
     {
-        //cout << 111 << endl;
         double temp1 = 0;
         double temp0 = 0;
         for (j = 0; j < col - 1; j++) {
@@ -508,7 +507,6 @@ int System::PredictBalance() {
         theta0 = theta0 - v * temp0;
         temp0 = 0;
         temp1 = 0;
-        //e = (pow((old_theta1-theta1),2) + pow((old_theta0 - theta0),2));
         if ((old_theta0 - theta0 < 0.05) && (old_theta1 - theta1 < 0.05)) {
             if (theta1 >= 0) {
                 cout << "系统通过运算得到您的余额呈涨势，涨幅为" << theta1 << endl;
@@ -760,7 +758,7 @@ void System::mainMenu() {
                             cout << "[■]";
                         }
                     }
-                    cin.sync(); //清空输入缓冲区
+                    cin.sync();
                     system("cls");
                     switch (index3) {
                         case 0:
