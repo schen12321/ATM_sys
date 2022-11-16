@@ -35,13 +35,13 @@ int System::signIn() {
     }
     cout << "请输入您的密码:";
     cin >> passwd;
-    passwd = MD5(passwd).toStr();
+    passwd = MD5(passwd).toStr();                               //密码以md5形式存储
     cout << accountIndex[id]->passwd;
     if (accountIndex[id]->passwd != passwd) {
         cout << "密码错误";
         accountIndex[id]->wrongPasswdLeft -= 1;
         Record::saveRecord(accounts);
-        switch (accountIndex[id]->wrongPasswdLeft) {
+        switch (accountIndex[id]->wrongPasswdLeft) {                    //输错3次判断冻结账户
             case 2:
                 cout << ", 还有2次机会" << endl;
                 return -3;
@@ -56,7 +56,7 @@ int System::signIn() {
     cout << "登陆成功" << endl;
     currAccount = accountIndex[id];
     currAccountId = id_bak;
-    currAccount->wrongPasswdLeft = 3;        //重置剩余错误次数
+    currAccount->wrongPasswdLeft = 3;                                   //重置剩余错误次数
     return 1;
 }
 
@@ -96,9 +96,8 @@ int System::signOut() {
 }
 
 int System::signUp() {
-    //输入卡号姓名密码
     string id, name, passwd;
-    cout << "请输入卡号:";
+    cout << "请输入卡号:";                               //输入卡号姓名密码
     cin >> id;
     id = MD5(id).toStr();
     if (accountIndex.count(id)) {
@@ -109,7 +108,7 @@ int System::signUp() {
     cin >> name;
     cout << "请输入密码(6位数字):";
     cin >> passwd;
-    if (passwd.length() != 6) {
+    if (passwd.length() != 6) {                         //限制位数和形式
         cout << "密码必须为6位数字" << endl;
         return -1;
     }
@@ -120,9 +119,7 @@ int System::signUp() {
         }
     }
     passwd = MD5(passwd).toStr();
-
-    //增加用户成功
-    Account account(id, name, passwd);
+    Account account(id, name, passwd);        //增加用户成功
     accounts.push_back(account);
     for (auto &acc: accounts) {
         accountIndex[acc.id] = &(acc);
@@ -147,7 +144,7 @@ int System::changePassword() {
         }
         cout << "请输入新密码(6位数字):";
         cin >> newPasswd;
-        if (newPasswd.length() != 6) {
+        if (newPasswd.length() != 6) {                          //限制位数和形式
             cout << "密码必须为6位数字" << endl;
             return -1;
         }
@@ -158,7 +155,7 @@ int System::changePassword() {
             }
         }
         newPasswd = MD5(newPasswd).toStr();
-        if (newPasswd == accountIndex[id]->passwd) {
+        if (newPasswd == accountIndex[id]->passwd) {            //判断新旧密码是否相同
             cout << "新旧密码相同" << endl;
             return 0;
         }
@@ -171,7 +168,7 @@ int System::changePassword() {
         accountIndex[id]->wrongPasswdLeft = 3;
         accountIndex[id]->passwd = newPasswd;
     }
-        //非管理员
+    //非管理员操作部分
     else {
         string newPasswd, passwdConfirm;
         char ch;
@@ -206,7 +203,7 @@ int System::changePassword() {
         }
         currAccount->passwd = newPasswd;
     }
-    Record::saveRecord(accounts);//保存
+    Record::saveRecord(accounts);                               //保存记录
     cout << "密码修改成功" << endl;
     return 1;
 }
@@ -225,7 +222,7 @@ int System::deleteAccount() {
         }
         cout << "请确认是否注销<Y/N>:";
         cin >> ch;
-        if (ch != 'y' && ch != 'Y') {
+        if (ch != 'y' && ch != 'Y') {                               //确认操作
             cout << "操作取消" << endl;
             return -2;
         }
@@ -249,17 +246,16 @@ int System::deleteAccount() {
             return -1;
         }
         cout << "您的余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance
-             << " 元, 请确认是否注销<Y/N>:";
+             << " 元, 请确认是否注销<Y/N>:";                            //显示余额以确认是否注销
         cin >> ch;
         if (ch != 'y' && ch != 'Y') {
             cout << "操作取消";
             return -2;
         }
-        //成功注销
-        accountIndex.erase(currAccount->id);
+        accountIndex.erase(currAccount->id);                      //注销成功
         swap(*currAccount, *(accounts.end() - 1));
         accounts.pop_back();
-        currAccount = nullptr;
+        currAccount = nullptr;                                       //当前用户推出
         currAccountId.clear();
         Record::saveRecord(accounts);
         cout << "账户注销成功" << endl;
