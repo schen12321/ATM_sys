@@ -1,10 +1,10 @@
 #include "system.h"
 
-void goToScreen(int xx, int yy)
-{
+void goToScreen(int xx, int yy) {
     COORD scrn;
     HANDLE hOuput = GetStdHandle(STD_OUTPUT_HANDLE);
-    scrn.X = xx; scrn.Y = yy;
+    scrn.X = xx;
+    scrn.Y = yy;
     SetConsoleCursorPosition(hOuput, scrn);
 }
 
@@ -450,74 +450,71 @@ int System::transfer() {
 }
 
 int System::PredictBalance() {
-    if (currAccount -> transactionHistory.size() < 20){
+    if (currAccount->transactionHistory.size() < 20) {
         cout << "交易记录少于20条,无法预测余额" << endl;
         return 0;
     }
     float v = 0.001;
     double theta0;
-    int i,j,k,m;
+    int i, j, k, m;
     int col;
     int number;
     int sum_x = 0;
     int sum_y = 0;
-    int  currBalance[21];     /*数据样本*/
+    int currBalance[21];     /*数据样本*/
     double theta1;       /* 一次项的系数*/
     double e;            /*误差系数*/
     double old_theta1;
     double old_theta0;
     Account::Transaction currtrans;
-    int si = currAccount -> transactionHistory.size();
+    int si = currAccount->transactionHistory.size();
     int type;
     number = 21;
     currBalance[20] = currAccount->balance;
-    for(k=19;k>=0;k--) //y轴(每次交易后的余额)的写入
+    for (k = 19; k >= 0; k--) //y轴(每次交易后的余额)的写入
     {
-        currtrans = currAccount -> transactionHistory[si+k-20];
+        currtrans = currAccount->transactionHistory[si + k - 20];
         type = currtrans.transactionType;
-        if(type == 1 || type == 3 ){
-            currBalance[k]=currBalance[k+1]-currtrans.transactionAmount;
+        if (type == 1 || type == 3) {
+            currBalance[k] = currBalance[k + 1] - currtrans.transactionAmount;
         }
-        if(type == 2 || type == 4 ){
-            currBalance[k]=currBalance[k+1]+currtrans.transactionAmount;
+        if (type == 2 || type == 4) {
+            currBalance[k] = currBalance[k + 1] + currtrans.transactionAmount;
         }
     }
-    k=0;
-    m=0;
+    k = 0;
+    m = 0;
     col = number;
-    for(i=0;i<col-1;i++)
-    {
+    for (i = 0; i < col - 1; i++) {
         sum_x = sum_x + i;
         sum_y = sum_y + currBalance[i];
     }
-    theta1 = (double)sum_y/sum_x;
+    theta1 = (double) sum_y / sum_x;
     theta0 = currBalance[0];
-    while(1)                     /*开始迭代循环，直到找到最优解退出循环*/
+    while (1)                     /*开始迭代循环，直到找到最优解退出循环*/
     {
         //cout << 111 << endl;
         double temp1 = 0;
         double temp0 = 0;
-        for(j=0;j<col-1;j++)
-        {
-            temp1 = temp1 + (currBalance[j]-(theta0 + theta1*j))*j;
-            temp0 = temp0 + (currBalance[j]-(theta0 + theta1*j))*1;
+        for (j = 0; j < col - 1; j++) {
+            temp1 = temp1 + (currBalance[j] - (theta0 + theta1 * j)) * j;
+            temp0 = temp0 + (currBalance[j] - (theta0 + theta1 * j)) * 1;
         }
         old_theta1 = theta1;
         old_theta0 = theta0;
         temp1 = temp1 / col;
         temp0 = temp0 / col;
-        theta1 = theta1 - v*temp1;
-        theta0 = theta0 - v*temp0;
+        theta1 = theta1 - v * temp1;
+        theta0 = theta0 - v * temp0;
         temp0 = 0;
         temp1 = 0;
         //e = (pow((old_theta1-theta1),2) + pow((old_theta0 - theta0),2));
-        if((old_theta0-theta0<0.05)&&(old_theta1-theta1<0.05))
-        {
-            if(theta1 >= 0){
+        if ((old_theta0 - theta0 < 0.05) && (old_theta1 - theta1 < 0.05)) {
+            if (theta1 >= 0) {
                 cout << "系统通过运算得到您的余额呈涨势，涨幅为" << theta1 << endl;
                 break;
             }
-            if(theta1 < 0){
+            if (theta1 < 0) {
                 cout << "系统通过运算得到您的余额呈降势，降幅为" << theta1 << endl;
                 break;
             }
@@ -556,37 +553,34 @@ void System::mainMenu() {
         cout << "|                                         |\n";
         cout << "|                                         |\n";
         cout << "+-----------------------------------------+\n";
-        string select1[] = { "管理员登录","用户登录","退出软件" };
+        string select1[] = {"管理员登录", "用户登录", "退出软件"};
         string arrow = "-> ";
         for (int i = 0; i < 3; i++) {
-            goToScreen(16, 13 + 2 * i);
-            cout << select1[i];
+            goToScreen(16, 13 + 2 * i);             //设置光标位置
+            cout << select1[i];                            //输出选项
         }
-        goToScreen(12, 13 + 2 * index1);
-        cout << arrow << "  " << select1[index1];
+        goToScreen(12, 13 + 2 * index1);            //设置光标位置
+        cout << arrow << "  " << select1[index1];          //输出箭头和选项（覆盖原先只有选项）
 
         while (true) {
             if (_kbhit()) {
-                ch = _getch();//not print at screen
+                ch = _getch();                             //读取键盘输入且不在屏幕输出
                 if (ch == 13) {
                     break;
-                }
-                else if (ch == 72) {//up
-                    printf("\r|%*c|\r", 41, ' ');
+                } else if (ch == 72) {                      //上
+                    printf("\r|%*c|\r", 41, ' ');    // /r返回行首，输出一串空格覆盖掉原先内容，再/r返回行首
                     goToScreen(16, 13 + 2 * index1);
                     cout << select1[index1];
                     index1--;
-                }
-                else if (ch == 80) {//down
-                    printf("\r|%*c|\r", 41, ' ');
+                } else if (ch == 80) {                      //下
+                    printf("\r|%*c|\r", 41, ' ');    // /r返回行首，输出一串空格覆盖掉原先内容，再/r返回行首
                     goToScreen(16, 13 + 2 * index1);
                     cout << select1[index1];
                     index1++;
                 }
-                if (index1 < 0) {
+                if (index1 < 0) {                           //如果下标小于0，则调至最后
                     index1 = 2;
-                }
-                else if (index1 > 2) {
+                } else if (index1 > 2) {                    //如果下标大于2（数组最后一位下标），则调到第一个
                     index1 = 0;
                 }
                 goToScreen(12, 13 + 2 * index1);
@@ -605,11 +599,11 @@ void System::mainMenu() {
                 cout << " ----------------------------------------- \n";
                 adminSignIn();
                 if (!isAdmin) {
-                    system ("pause");
-                    system ("cls");
+                    system("pause");
+                    system("cls");
                     break;
                 }
-                system ("cls");
+                system("cls");
                 do {
 
                     cout << " ------------------------------------------ \n";
@@ -624,7 +618,7 @@ void System::mainMenu() {
                     cout << "|                                          |\n";
                     cout << "|                                          |\n";
                     cout << " ------------------------------------------ \n";
-                    string select2[] = { "[  ]  开户", "[  ]  销户", "[  ]修改密码", "[  ]退出登录" };
+                    string select2[] = {"[  ]  开户", "[  ]  销户", "[  ]修改密码", "[  ]退出登录"};
 
                     for (int i = 0; i < 4; i++) {
                         goToScreen(16, 7 + i);
@@ -635,15 +629,14 @@ void System::mainMenu() {
 
                     while (true) {
                         if (_kbhit()) {
-                            ch = _getch();//not print at screen
+                            ch = _getch();
                             if (ch == 13) break;
-                            if (ch == 72) {//up
+                            if (ch == 72) {
                                 printf("\r|%*c|\r", 42, ' ');
                                 goToScreen(16, 7 + index2);
                                 cout << select2[index2];
                                 index2--;
-                            }
-                            else if (ch == 80){//down
+                            } else if (ch == 80) {
                                 printf("\r|%*c|\r", 42, ' ');
                                 goToScreen(16, 7 + index2);
                                 cout << select2[index2];
@@ -651,8 +644,7 @@ void System::mainMenu() {
                             }
                             if (index2 < 0) {
                                 index2 = 3;
-                            }
-                            else if (index2 > 3) {
+                            } else if (index2 > 3) {
                                 index2 = 0;
                             }
 
@@ -660,7 +652,7 @@ void System::mainMenu() {
                             cout << "[■]";
                         }
                     }
-                    system ("cls");
+                    system("cls");
                     switch (index2) {
                         case 0:
                             cout << " ------------------------------------------ \n";
@@ -668,32 +660,32 @@ void System::mainMenu() {
                             cout << " ------------------------------------------ \n";
                             cout << "              #录入账户信息#\n";
                             signUp();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 1:
                             cout << " ------------------------------------------ \n";
                             cout << "                  #销户#\n\n";
                             deleteAccount();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 2:
                             cout << " ------------------------------------------ \n";
                             cout << "                 #修改密码#\n\n";
                             changePassword();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 3:
                             signOut();
                             //system ("pause");
-                            system ("cls");
+                            system("cls");
                             break;
                         default:
                             cout << "输入错误，请重新输入!\n";
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                     }
                 } while (index2 != 3);
                 break;
@@ -731,7 +723,8 @@ void System::mainMenu() {
                     cout << "|                                            |\n";
                     cout << "|                                            |\n";
                     cout << "+--------------------------------------------+\n";
-                    string select3[] = { "[  ]  存款", "[  ]  取款", "[  ]  转账", "[  ]查询余额", "[  ]交易记录", "[  ]余额预测", "[  ]修改密码", "[  ]  销户", "[  ]  退出" };
+                    string select3[] = {"[  ]  存款", "[  ]  取款", "[  ]  转账", "[  ]查询余额", "[  ]交易记录",
+                                        "[  ]余额预测", "[  ]修改密码", "[  ]  销户", "[  ]  退出"};
                     goToScreen(15, 7);
                     cout << "用户: " << currAccount->name;
                     for (int i = 0; i < 8; i++) {
@@ -746,14 +739,12 @@ void System::mainMenu() {
                             ch = _getch();//not print at screen
                             if (ch == 13) {
                                 break;
-                            }
-                            else if (ch == 72) {//up
+                            } else if (ch == 72) {//up
                                 printf("\r|%*c|\r", 44, ' ');
                                 goToScreen(15, 9 + index3);
                                 cout << select3[index3];
                                 index3--;
-                            }
-                            else if (ch == 80) {//down
+                            } else if (ch == 80) {//down
                                 printf("\r|%*c|\r", 44, ' ');
                                 goToScreen(15, 9 + index3);
                                 cout << select3[index3];
@@ -761,8 +752,7 @@ void System::mainMenu() {
                             }
                             if (index3 < 0) {
                                 index3 = 7;
-                            }
-                            else if (index3 > 7) {
+                            } else if (index3 > 7) {
                                 index3 = 0;
                             }
 
@@ -771,68 +761,68 @@ void System::mainMenu() {
                         }
                     }
                     cin.sync(); //清空输入缓冲区
-                    system ("cls");
+                    system("cls");
                     switch (index3) {
                         case 0:
                             cout << " ------------------------------------------ \n";
                             cout << "                   #存款#\n\n";
                             deposit();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 1:
                             cout << " ------------------------------------------ \n";
                             cout << "                 #取款#\n\n";
                             withdrawal();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 2:
                             cout << " ------------------------------------------ \n";
                             cout << "                 #转账#\n\n";
                             transfer();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 3:
                             cout << " ------------------------------------------ \n";
                             cout << "                 #余额#\n\n";
                             showBalance();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 4:
                             cout << " ------------------------------------------ \n";
                             cout << "                 #交易记录#\n\n";
                             Record::exportTransactionHistory(currAccount->transactionHistory);
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 5:
                             cout << " ------------------------------------------ \n";
                             cout << "                 #余额预测#\n\n";
                             PredictBalance();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 6:
                             cout << " ------------------------------------------ \n";
                             cout << "                #修改密码#\n\n";
                             changePassword();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             break;
                         case 7:
                             cout << " ------------------------------------------ \n";
                             cout << "                  #销户#\n\n";
                             deleteAccount();
-                            system ("pause");
-                            system ("cls");
+                            system("pause");
+                            system("cls");
                             choice3 = '0';
                             break;
                         case 8:
                             signOut();
-                            system ("cls");
+                            system("cls");
                             break;
                     }
                 } while (index3 != 7);
@@ -849,8 +839,8 @@ void System::mainMenu() {
                 break;
             default:
                 printf("输入错误，请重新输入!\n");
-                system ("pause");
-                system ("cls");
+                system("pause");
+                system("cls");
         }
     } while (true);
 }
