@@ -24,8 +24,8 @@ private:
     Account *currAccount{nullptr};                                   //当前登录用户，为空则表示未登录
     string currAccountId;                                            //当前用户卡号，为空则表示未登录
     bool isAdmin{false};                                             //是否为管理员账号
-    const string adminId{"admin"};                              //保存管理员账户ID
-    const string adminPassword{"123456"};                            //保存管理员账户密码
+    const string adminId{"admin"};                                //保存管理员账户ID
+    const string adminPassword{"123456"};                         //保存管理员账户密码
 
 public:
     //类的构造函数，从文件中加载账户信息
