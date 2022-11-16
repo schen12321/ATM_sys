@@ -739,7 +739,7 @@ void System::mainMenu() {
                                         "[  ]余额预测", "[  ]修改密码", "[  ]  销户", "[  ]  退出"};
                     goToScreen(15, 7);
                     cout << "用户: " << currAccount->name;
-                    for (int i = 0; i < 8; i++) {
+                    for (int i = 0; i < 9; i++) {
                         goToScreen(15, 9 + i);
                         cout << select3[i];
                     }
@@ -763,8 +763,8 @@ void System::mainMenu() {
                                 index3++;
                             }
                             if (index3 < 0) {
-                                index3 = 7;
-                            } else if (index3 > 7) {
+                                index3 = 8;
+                            } else if (index3 > 8) {
                                 index3 = 0;
                             }
 
@@ -836,7 +836,7 @@ void System::mainMenu() {
                             system("cls");
                             break;
                     }
-                } while (index3 != 7);
+                } while (index3 != 8);
                 break;
             case 2:
                 cout << "   ____                 _ ____            /\\/|\n"
