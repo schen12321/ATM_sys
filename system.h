@@ -12,6 +12,7 @@
 #include "record.h"
 #include "MD5.h"
 #include <conio.h>
+#include <windows.h>
 
 using namespace std;
 
