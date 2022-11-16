@@ -255,7 +255,7 @@ int System::deleteAccount() {
         accountIndex.erase(currAccount->id);                      //注销成功
         swap(*currAccount, *(accounts.end() - 1));
         accounts.pop_back();
-        currAccount = nullptr;                                       //当前用户退出
+        currAccount = nullptr;                                       //当前用户退出p
         currAccountId.clear();
         Record::saveRecord(accounts);
         cout << "账户注销成功" << endl;
@@ -268,6 +268,7 @@ int System::showBalance() {
     return 1;
 }
 
+//return值为不同类型的错误，Qt备用
 int System::deposit() {
     if (!currAccount) {
         cout << "Error: 账户未登录" << endl;
@@ -280,23 +281,23 @@ int System::deposit() {
     try {
         deposit_amount = stod(deposit_amount_str);
     }
-    catch (...) {
+    catch (...) {                                                       //输入数字以外字符导致的错误
         cout << "输入错误" << endl;
         return -1;
     }
-    if (deposit_amount_str.length() >= 10) {
+    if (deposit_amount_str.length() >= 10) {                            //防止金额过大导致的溢出
         cout << "输入错误" << endl;
         return -2;
     }
-    if (deposit_amount <= 0) {
+    if (deposit_amount <= 0) {                                          //不允许为负数
         cout << "输入错误" << endl;
         return -2;
     }
-    if (deposit_amount > 10000) {
+    if (deposit_amount > 10000) {                                       //单笔限额
         cout << "单笔存款不得超过 10000 元" << endl;
         return -2;
     }
-    if ((int) (deposit_amount / 100) * 100 != deposit_amount) {
+    if ((int) (deposit_amount / 100) * 100 != deposit_amount) {         //限制为100的整数倍
         cout << "存款金额必须为100的整数倍" << endl;
         return -3;
     }
@@ -318,6 +319,7 @@ int System::deposit() {
     return 1;
 }
 
+//return值为不同类型的错误，Qt备用
 int System::withdrawal() {
     if (!currAccount) {
         cout << "Error: 账户未登录" << endl;
@@ -367,7 +369,7 @@ int System::withdrawal() {
     cout << "成功取款 " << withdrawal_amount << " 元" << endl;
     cout << "当前余额为 " << setiosflags(ios::fixed) << setprecision(2) << currAccount->balance << " 元" << endl;
     cout << "正在出钞, 请稍后..." << endl;
-    sleep(2);
+    sleep(2);                                                           //模拟真实场景出钞时间
     cout << "请取回您的现金" << endl;
     cout << "是否打印凭证<Y/N>:";
     cin >> ch;
@@ -391,7 +393,7 @@ int System::transfer() {
         cout << "卡号不存在" << endl;
         return -1;
     }
-    if (toId_copy == currAccountId) {
+    if (toId_copy == currAccountId) {                                   //排除给自身转账的情况
         cout << "转账对象不能为自身" << endl;
         return -3;
     }
@@ -759,7 +761,6 @@ void System::mainMenu() {
                             cout << "[■]";
                         }
                     }
-                    cin.sync();
                     system("cls");
                     switch (index3) {
                         case 0:
@@ -848,7 +849,6 @@ string System::getTimestamp() {
     timeb timestamp{};
     ftime(&timestamp);
 
-    //毫秒数可能不足三位，要补上0
     stringstream ss;
     ss << setw(3) << setfill('0') << timestamp.millitm;
 
