@@ -449,8 +449,9 @@ int System::transfer() {
     return 1;
 }
 
+//利用线性回归计算算出余额走向的趋势
 int System::PredictBalance() {
-    if (currAccount->transactionHistory.size() < 20) {
+    if (currAccount->transactionHistory.size() < 20) {                          //交易记录小于20条时不可以开始预测
         cout << "交易记录少于20条,无法预测余额" << endl;
         return 0;
     }
@@ -467,7 +468,7 @@ int System::PredictBalance() {
     double old_theta1;
     double old_theta0;
     Account::Transaction currtrans;
-    int si = currAccount->transactionHistory.size();
+    int si = currAccount->transactionHistory.size();                           //获取历史交易记录条数
     int type;
     number = 21;
     currBalance[20] = currAccount->balance;
@@ -475,10 +476,10 @@ int System::PredictBalance() {
     {
         currtrans = currAccount->transactionHistory[si + k - 20];
         type = currtrans.transactionType;
-        if (type == 1 || type == 3) {
+        if (type == 1 || type == 3) {                                          //1和3分别为存款和转入
             currBalance[k] = currBalance[k + 1] - currtrans.transactionAmount;
         }
-        if (type == 2 || type == 4) {
+        if (type == 2 || type == 4) {                                          //2和4分别为取款和转出
             currBalance[k] = currBalance[k + 1] + currtrans.transactionAmount;
         }
     }
@@ -491,7 +492,7 @@ int System::PredictBalance() {
     }
     theta1 = (double) sum_y / sum_x;
     theta0 = currBalance[0];
-    while (1)                     //开始迭代循环，直到找到最优解退出循环
+    while (1)                                                                 //开始迭代循环，直到找到最优解退出循环
     {
         double temp1 = 0;
         double temp0 = 0;
@@ -507,7 +508,7 @@ int System::PredictBalance() {
         theta0 = theta0 - v * temp0;
         temp0 = 0;
         temp1 = 0;
-        if ((old_theta0 - theta0 < 0.05) && (old_theta1 - theta1 < 0.05)) {
+        if ((old_theta0 - theta0 < 0.05) && (old_theta1 - theta1 < 0.05)) {  //输出预测分析的结果
             if (theta1 >= 0) {
                 cout << "系统通过运算得到您的余额呈涨势，涨幅为" << theta1 << endl;
                 break;
