@@ -99,6 +99,16 @@ int System::signUp() {
     string id, name, passwd;
     cout << "请输入卡号:";                               //输入卡号姓名密码
     cin >> id;
+    if(id.length() != 6){                              //限制位数和形式
+        cout << "卡号必须为6位数字" << endl;
+        return -3;
+    }
+    for(int i =0 ; i < id.length() ; i++){
+        if(id[i] < 48 || id[i] > 57){
+            cout << "卡号必须为6位数字" << endl;
+            return -4;
+        }
+    }
     id = MD5(id).toStr();
     if (accountIndex.count(id)) {
         cout << "此卡号已存在" << endl;
@@ -492,9 +502,9 @@ int System::PredictBalance() {
         sum_x = sum_x + i;
         sum_y = sum_y + currBalance[i];
     }
-    theta1 = (double) sum_y / sum_x;
+    theta1 = double(sum_y / sum_x);
     theta0 = currBalance[0];
-    while (1)                                                                 //开始迭代循环，直到找到最优解退出循环
+    while (true)                                                                 //开始迭代循环，直到找到最优解退出循环
     {
         double temp1 = 0;
         double temp0 = 0;
