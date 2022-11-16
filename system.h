@@ -12,6 +12,7 @@
 #include "record.h"
 #include "MD5.h"
 #include <conio.h>
+#include <math.h>
 #include <windows.h>
 
 using namespace std;
@@ -63,6 +64,9 @@ private:
 
     //负责实现余额查询功能
     int showBalance();
+
+    //预测用户余额走势
+    int PredictBalance();
 
     //负责实现菜单的显示
     void mainMenu();

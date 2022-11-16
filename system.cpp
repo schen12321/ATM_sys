@@ -453,6 +453,83 @@ int System::transfer() {
     return 1;
 }
 
+int System::PredictBalance() {
+    if (currAccount -> transactionHistory.size() < 20){
+        cout << "交易记录少于20条,无法预测余额" << endl;
+        return 0;
+    }
+    float v = 0.001;
+    double theta0;
+    int i,j,k,m;
+    int col;
+    int number;
+    int sum_x = 0;
+    int sum_y = 0;
+    int  currBalance[21];     /*数据样本*/
+    double theta1;       /* 一次项的系数*/
+    double e;            /*误差系数*/
+    double old_theta1;
+    double old_theta0;
+    Account::Transaction currtrans;
+    int si = currAccount -> transactionHistory.size();
+    int type;
+    number = 21;
+    currBalance[20] = currAccount->balance;
+    for(k=19;k>=0;k--) //y轴(每次交易后的余额)的写入
+    {
+        currtrans = currAccount -> transactionHistory[si+k-20];
+        type = currtrans.transactionType;
+        if(type == 1 || type == 3 ){
+            currBalance[k]=currBalance[k+1]-currtrans.transactionAmount;
+        }
+        if(type == 2 || type == 4 ){
+            currBalance[k]=currBalance[k+1]+currtrans.transactionAmount;
+        }
+    }
+    k=0;
+    m=0;
+    col = number;
+    for(i=0;i<col-1;i++)
+    {
+        sum_x = sum_x + i;
+        sum_y = sum_y + currBalance[i];
+    }
+    theta1 = (double)sum_y/sum_x;
+    theta0 = currBalance[0];
+    while(1)                     /*开始迭代循环，直到找到最优解退出循环*/
+    {
+        //cout << 111 << endl;
+        double temp1 = 0;
+        double temp0 = 0;
+        for(j=0;j<col-1;j++)
+        {
+            temp1 = temp1 + (currBalance[j]-(theta0 + theta1*j))*j;
+            temp0 = temp0 + (currBalance[j]-(theta0 + theta1*j))*1;
+        }
+        old_theta1 = theta1;
+        old_theta0 = theta0;
+        temp1 = temp1 / col;
+        temp0 = temp0 / col;
+        theta1 = theta1 - v*temp1;
+        theta0 = theta0 - v*temp0;
+        temp0 = 0;
+        temp1 = 0;
+        //e = (pow((old_theta1-theta1),2) + pow((old_theta0 - theta0),2));
+        if((old_theta0-theta0<0.05)&&(old_theta1-theta1<0.05))
+        {
+            if(theta1 >= 0){
+                cout << "系统通过运算得到您的余额呈涨势，涨幅为" << theta1 << endl;
+                break;
+            }
+            if(theta1 < 0){
+                cout << "系统通过运算得到您的余额呈降势，降幅为" << theta1 << endl;
+                break;
+            }
+        }
+    }
+    return 1;
+}
+
 void System::mainMenu() {
     char choice1, choice2, choice3, choice4;
     HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -658,7 +735,7 @@ void System::mainMenu() {
                     cout << "|                                            |\n";
                     cout << "|                                            |\n";
                     cout << "+--------------------------------------------+\n";
-                    string select3[] = { "[  ]  存款", "[  ]  取款", "[  ]  转账", "[  ]查询余额", "[  ]交易记录", "[  ]修改密码", "[  ]  销户", "[  ]  退出" };
+                    string select3[] = { "[  ]  存款", "[  ]  取款", "[  ]  转账", "[  ]查询余额", "[  ]交易记录", "[  ]余额预测", "[  ]修改密码", "[  ]  销户", "[  ]  退出" };
                     goToScreen(15, 7);
                     cout << "用户: " << currAccount->name;
                     for (int i = 0; i < 8; i++) {
@@ -737,12 +814,19 @@ void System::mainMenu() {
                             break;
                         case 5:
                             cout << " ------------------------------------------ \n";
+                            cout << "                 #余额预测#\n\n";
+                            PredictBalance();
+                            system ("pause");
+                            system ("cls");
+                            break;
+                        case 6:
+                            cout << " ------------------------------------------ \n";
                             cout << "                #修改密码#\n\n";
                             changePassword();
                             system ("pause");
                             system ("cls");
                             break;
-                        case 6:
+                        case 7:
                             cout << " ------------------------------------------ \n";
                             cout << "                  #销户#\n\n";
                             deleteAccount();
@@ -750,7 +834,7 @@ void System::mainMenu() {
                             system ("cls");
                             choice3 = '0';
                             break;
-                        case 7:
+                        case 8:
                             signOut();
                             system ("cls");
                             break;
