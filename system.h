@@ -16,6 +16,7 @@
 using namespace std;
 
 class System {
+private:
     vector<Account> accounts;                                        //记录所有用户数据
     unordered_map<string, Account *> accountIndex;                   //以卡号为键创建用户索引
     Account *currAccount{nullptr};                                   //当前登录用户，为空则表示未登录
