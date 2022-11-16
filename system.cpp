@@ -36,7 +36,6 @@ int System::signIn() {
     cout << "«Î ‰»Îƒ˙µƒ√‹¬Î:";
     cin >> passwd;
     passwd = MD5(passwd).toStr();                               //√‹¬Î“‘md5–Œ Ω¥Ê¥¢
-    cout << accountIndex[id]->passwd;
     if (accountIndex[id]->passwd != passwd) {
         cout << "√‹¬Î¥ÌŒÛ";
         accountIndex[id]->wrongPasswdLeft -= 1;
